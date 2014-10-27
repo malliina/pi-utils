@@ -18,7 +18,7 @@ object PiBuild extends Build {
   lazy val piProject = SbtProjects.mavenPublishProject("pi-utils").settings(projectSettings: _*)
 
   lazy val projectSettings = assemblySettings ++ remoteSettings ++ Seq(
-    version := "0.1.1",
+    version := "0.1.2",
     scalaVersion := "2.11.2",
     SbtUtils.gitUserName := "malliina",
     SbtUtils.developerName := "Michael Skogberg",
