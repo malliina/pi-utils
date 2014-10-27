@@ -1,4 +1,4 @@
-import com.mle.sbtutils.SbtProjects
+import com.mle.sbtutils.{SbtUtils, SbtProjects}
 import com.mle.ssh.{RemoteConfigReader, RootRemoteInfo, SSH}
 import com.mle.util.Utils
 import sbt.Keys._
@@ -15,12 +15,13 @@ object PiBuild extends Build {
 
   val remoteRun = taskKey[Unit]("Builds a local jar, transfers it to a remote machine and runs it remotely")
   val conf = taskKey[RootRemoteInfo]("The config")
-  lazy val piProject = SbtProjects.testableProject("pi-utils").settings(projectSettings: _*)
+  lazy val piProject = SbtProjects.mavenPublishProject("pi-utils").settings(projectSettings: _*)
 
   lazy val projectSettings = assemblySettings ++ remoteSettings ++ Seq(
     version := "0.1.1",
     scalaVersion := "2.11.2",
-    organization := "com.github.malliina",
+    SbtUtils.gitUserName := "malliina",
+    SbtUtils.developerName := "Michael Skogberg",
     fork in Test := true,
     test in assembly := {},
     mainClass in assembly := Some("com.mle.pi.Hello"),
