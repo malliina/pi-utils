@@ -3,12 +3,10 @@ package com.mle.pi
 import java.io.Closeable
 
 import com.mle.util.Utils
-import com.pi4j.io.gpio.{Pin, PinState}
 import rx.lang.scala.Observable
 
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, Future, Promise}
-
 
 
 /**
@@ -49,7 +47,7 @@ object Hello {
 
   def fiver(): Unit = {
     usingAsync(new PiRevB2)(pins => {
-//      val sub = pins.events.subscribe(change => println(change))
+      //      val sub = pins.events.subscribe(change => println(change))
       pins.PIN07.enableTimed(10.seconds)
     })
   }
@@ -92,7 +90,7 @@ object Hello {
 
   def withController(f: LedController => Unit) = Utils.using(new LedController(ledPins, rgbPins))(f)
 
-  def withPins(f: PinController => Future[Any]) = usingAsync(new PinController(ledPins))(f)
+  def withPins(f: PinController => Future[Any]) = usingAsync(new PinController(ledPins, Nil))(f)
 
   def withControllerAsync(f: LedController => Future[Any]) = usingAsync(new LedController(ledPins, rgbPins))(f)
 

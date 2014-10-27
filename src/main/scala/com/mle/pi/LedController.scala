@@ -8,7 +8,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 /**
  * @author Michael
  */
-class LedController(leds: Seq[StatefulPin], rgbs: Seq[StatefulPin]) extends PinController(leds ++ rgbs) {
+class LedController(leds: Seq[DigitalPin], rgbs: Seq[DigitalPin]) extends PinController(leds ++ rgbs, Nil) {
   private val executor = Executors.newSingleThreadScheduledExecutor()
   implicit val ec = ExecutionContext.fromExecutor(executor)
   val ledPins = ppins take leds.size
@@ -25,7 +25,7 @@ class LedController(leds: Seq[StatefulPin], rgbs: Seq[StatefulPin]) extends PinC
     enableTimed2(duration, color, leds.map(ledPins.apply): _*)
   }
 
-  def enableTimed2(duration: Duration, color: Color, leds: ProvisionedPin*): Future[Seq[Unit]] = {
+  def enableTimed2(duration: Duration, color: Color, leds: ProvisionedDigitalPin*): Future[Seq[Unit]] = {
     setColor(color)
     Future.sequence(leds.map(_.enableTimed(duration)))
   }
@@ -40,7 +40,7 @@ class LedController(leds: Seq[StatefulPin], rgbs: Seq[StatefulPin]) extends PinC
 
   def setColor(color: Color) = {
     // 3-length seq of rgb pinstates
-    val Seq(redOp, greenOp, blueOp) = color.toSeq.map(b => (p: ProvisionedPin) => if (b) p.enable() else p.disable())
+    val Seq(redOp, greenOp, blueOp) = color.toSeq.map(b => (p: ProvisionedDigitalPin) => if (b) p.enable() else p.disable())
     val Seq(red, green, blue) = rgbPins
     redOp(red)
     greenOp(green)
