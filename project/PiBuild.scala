@@ -17,8 +17,9 @@ object PiBuild extends Build {
   val conf = taskKey[RootRemoteInfo]("The config")
   lazy val piProject = SbtProjects.mavenPublishProject("pi-utils").settings(projectSettings: _*)
 
+  val mleGroup = "com.github.malliina"
   lazy val projectSettings = assemblySettings ++ remoteSettings ++ Seq(
-    version := "0.1.5",
+    version := "0.1.6",
     scalaVersion := "2.11.2",
     SbtUtils.gitUserName := "malliina",
     SbtUtils.developerName := "Michael Skogberg",
@@ -29,7 +30,8 @@ object PiBuild extends Build {
       "com.pi4j" % "pi4j-core" % "0.0.5",
       "io.reactivex" %% "rxscala" % "0.21.1",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.1", // scalatest 2.11 requires
-      "com.github.malliina" %% "util-base" % "0.3.0") map (_.withSources())
+      mleGroup %% "util-base" % "0.3.0",
+      mleGroup %% "util" % "1.5.0") map (_.withSources())
   )
 
   def remoteSettings = Seq(

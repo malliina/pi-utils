@@ -2,48 +2,44 @@ package com.mle.pi
 
 import java.io.Closeable
 
-import com.pi4j.io.gpio.{GpioPin, GpioFactory, Pin}
+import com.mle.pi.PinEvents.PinChangedEvent
+import com.pi4j.io.gpio.{GpioFactory, GpioPin, Pin, PinMode}
+import rx.lang.scala.Observable
 
 /**
  * @author Michael
  */
-class PinController(pins: Seq[DigitalPin], pwms: Seq[PwmPin]) extends Closeable {
+class PinController(digitals: Seq[DigitalPin], pwms: Seq[PwmPin]) extends Closeable {
   private val gpio = GpioFactory.getInstance()
-  val ppins = provisionAll(pins)
+  val ppins = digitals map provisionDigital
   val ppwms = pwms map provisionPwm
-  //  val events = Observable[GpioPinDigitalStateChangeEvent](subscriber => {
-  //    val listener = new GpioPinListenerDigital {
-  //      override def handleGpioPinDigitalStateChangeEvent(event: GpioPinDigitalStateChangeEvent): Unit =
-  //        subscriber onNext event
-  //    }
-  //    gpio.add
-  //    gpio.addListener(listener,ppins.map(_.outPin):_*)
-  //    subscriber add Subscription(gpio removeListener listener)
-  //  })
+  val digitalEvents = mergeAll(ppins.map(_.events))
+  val pwmEvents = mergeAll(ppwms.map(_.events))
+  val events: Observable[PinChangedEvent] = digitalEvents merge pwmEvents
 
-  //  val listener = new GpioPinListenerAnalog {
-  //    override def handleGpioPinAnalogValueChangeEvent(event: GpioPinAnalogValueChangeEvent): Unit = event.
-  //  }
+  def mergeAll[T](events: Seq[Observable[T]]) =
+    events.foldLeft[Observable[T]](Observable.empty)((acc, elem) => acc merge elem)
 
   def get(pin: Pin): Option[ProvisionedDigitalPin] = ppins.find(_.backing.pin == pin)
 
   def disableAll() = ppins.foreach(_.disable())
 
-  private def provisionAll(leds: Seq[DigitalPin]): Seq[ProvisionedDigitalPin] = leds map provision
-
-  private def provision(pin: DigitalPin) = {
+  private def provisionDigital(pin: DigitalPin) = {
     val provisioned = gpio.provisionDigitalOutputPin(pin.pin, pin.disableState)
     provisioned.setShutdownOptions(true, pin.disableState)
     ProvisionedDigitalPin(provisioned, pin)
   }
 
-  private def provisionPwm(pin: MappedPin2) = {
+  private def provisionPwm(pin: PwmPin) = {
     val provisioned = gpio.provisionPwmOutputPin(pin.pin)
     provisioned.setShutdownOptions(true)
     ProvisionedPwmPin(provisioned, pin.number)
   }
 
-  private def unprovision(pins: Seq[ProvisionedPin[_ <: GpioPin]]) = gpio.unprovisionPin(pins.map(_.pin): _*)
+  private def unprovision(pins: Seq[ProvisionedPin[_ <: GpioPin, _]]) = {
+    gpio.unprovisionPin(pins.map(_.pin): _*)
+    pins.foreach(_.subject.onCompleted())
+  }
 
   override def close(): Unit = {
     gpio.shutdown()

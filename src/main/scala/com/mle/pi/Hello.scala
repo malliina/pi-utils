@@ -29,20 +29,20 @@ object Hello {
   val PIN18 = GPIO_05
   val PIN22 = GPIO_06
 
-  val LED01 = MappedPin(GPIO_01, 12)
-  val LED02 = MappedPin(GPIO_04, 16)
-  val LED03 = MappedPin(GPIO_05, 18)
-  val LED04 = MappedPin(GPIO_06, 22)
-  val LED05 = MappedPin(GPIO_07, 7)
-  val ledPins = Seq(LED01, LED02, LED03, LED04, LED05).map(_.low)
+  val LED01 = PinPlan(GPIO_01, 12)
+  val LED02 = PinPlan(GPIO_04, 16)
+  val LED03 = PinPlan(GPIO_05, 18)
+  val LED04 = PinPlan(GPIO_06, 22)
+  val LED05 = PinPlan(GPIO_07, 7)
+  val ledPins = LED01.high +: Seq(LED02, LED03, LED04, LED05).map(_.low)
 
-  val LED_RED = MappedPin(GPIO_00, 11)
-  val LED_GREEN = MappedPin(GPIO_02, 13)
-  val LED_BLUE = MappedPin(GPIO_03, 15)
+  val LED_RED = PinPlan(GPIO_00, 11)
+  val LED_GREEN = PinPlan(GPIO_02, 13)
+  val LED_BLUE = PinPlan(GPIO_03, 15)
   val rgbPins = Seq(LED_RED, LED_GREEN, LED_BLUE).map(_.high)
 
   def main(args: Array[String]) {
-    fiver()
+    redOne()
   }
 
   def fiver(): Unit = {
@@ -54,8 +54,9 @@ object Hello {
 
   def redOne(): Unit = {
     withControllerAsync(ctrl => {
+      val sub = ctrl.events.subscribe(change => println(change), err => println("Error."), () => println("Completed!"))
       ctrl.rgbPins.head.enable()
-      ctrl.ledPins.head.enableTimed(5.seconds)
+      ctrl.ledPins(1).enableTimed(5.seconds)
     })
   }
 
@@ -90,9 +91,9 @@ object Hello {
 
   def withController(f: LedController => Unit) = Utils.using(new LedController(ledPins, rgbPins))(f)
 
-  def withPins(f: PinController => Future[Any]) = usingAsync(new PinController(ledPins, Nil))(f)
-
   def withControllerAsync(f: LedController => Future[Any]) = usingAsync(new LedController(ledPins, rgbPins))(f)
+
+  def withPins(f: PinController => Future[Any]) = usingAsync(new PinController(ledPins, Nil))(f)
 
   def usingAsync[T <: Closeable](resource: T)(f: T => Future[Any]) = Utils.using(resource)(res => {
     val fut = f(res)

@@ -1,12 +1,12 @@
 package com.mle.pi
 
-import com.pi4j.io.gpio.{Pin, PinState}
+import com.pi4j.io.gpio.Pin
 
 /**
  * @author Michael
  */
-case class MappedPin(pin: Pin, number: Int) {
-  def high = DigitalPin(pin, number, PinState.HIGH)
+class MappedPin(val pin: Pin, val number: Int)
 
-  def low = DigitalPin(pin, number, PinState.LOW)
+object MappedPin {
+  def apply(pin: Pin, number: Int) = new MappedPin(pin, number)
 }
