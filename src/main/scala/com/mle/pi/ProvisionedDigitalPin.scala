@@ -15,7 +15,7 @@ case class ProvisionedDigitalPin(pin: GpioPinDigitalOutput, backing: DigitalPin)
   extends ProvisionedPin[GpioPinDigitalOutput, DigitalStateChanged] with Log {
   val enableState = backing.enableState
   val disableState = backing.disableState
-  val number = backing.number
+  val boardNumber = backing.boardNumber
 
   def enable() = setState(enableState)
 

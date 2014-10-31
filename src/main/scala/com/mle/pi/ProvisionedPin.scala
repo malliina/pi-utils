@@ -12,5 +12,5 @@ trait ProvisionedPin[T <: GpioPin, E <: PinChangedEvent] {
   val events: Observable[E] = subject
 
   val pin: T
-  val number: Int
+  val boardNumber: Int
 }

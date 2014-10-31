@@ -1,9 +1,12 @@
-package com.mle.pi
+package com.mle.pi.run
 
 import java.io.Closeable
 
-import com.mle.util.Utils
-import rx.lang.scala.Observable
+import com.mle.pi.PinEvents.PinChangedEvent
+import com.mle.pi._
+import com.mle.rx.Observables
+import com.mle.util.{Log, Utils}
+import rx.lang.scala.{Observable, Observer}
 
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, Future, Promise}
@@ -15,46 +18,46 @@ import scala.concurrent.{Await, Future, Promise}
  * @see http://pi4j.com/pins/model-b-rev2.html
  * @see http://pi4j.com/images/p1header-large.png
  */
-object Hello {
-
-  import com.pi4j.io.gpio.RaspiPin._
-
-  // model B rev 2 layout: http://pi4j.com/pins/model-b-rev2.html
-  val PIN07 = GPIO_07
-  val PIN11 = GPIO_00
-  val PIN12 = GPIO_01
-  val PIN13 = GPIO_02
-  val PIN15 = GPIO_03
-  val PIN16 = GPIO_04
-  val PIN18 = GPIO_05
-  val PIN22 = GPIO_06
-
-  val LED01 = PinPlan(GPIO_01, 12)
-  val LED02 = PinPlan(GPIO_04, 16)
-  val LED03 = PinPlan(GPIO_05, 18)
-  val LED04 = PinPlan(GPIO_06, 22)
-  val LED05 = PinPlan(GPIO_07, 7)
+object Hello extends Log {
+  val LED01 = PiRevB2.PIN12
+  val LED02 = PiRevB2.PIN16
+  val LED03 = PiRevB2.PIN18
+  val LED04 = PiRevB2.PIN22
+  val LED05 = PiRevB2.PIN07
   val ledPins = LED01.high +: Seq(LED02, LED03, LED04, LED05).map(_.low)
 
-  val LED_RED = PinPlan(GPIO_00, 11)
-  val LED_GREEN = PinPlan(GPIO_02, 13)
-  val LED_BLUE = PinPlan(GPIO_03, 15)
+  val LED_RED = PiRevB2.PIN11
+  val LED_GREEN = PiRevB2.PIN13
+  val LED_BLUE = PiRevB2.PIN15
   val rgbPins = Seq(LED_RED, LED_GREEN, LED_BLUE).map(_.high)
 
+  val pinObserver = Observer[PinChangedEvent](
+    (change: PinChangedEvent) => log.info("" + change),
+    (err: Throwable) => log.warn("Error.", err),
+    () => log.info("Completed!"))
+
   def main(args: Array[String]) {
-    redOne()
+    fiver()
+  }
+
+  def blaster(): Unit = {
+    val b = new Blaster
+    val num = PiRevB2.PIN07.gpioNumber
+    b.write(num, 200)
+    Thread sleep 5000
+    b.release(num)
   }
 
   def fiver(): Unit = {
     usingAsync(new PiRevB2)(pins => {
-      //      val sub = pins.events.subscribe(change => println(change))
+      pins.events subscribe pinObserver
       pins.PIN07.enableTimed(10.seconds)
     })
   }
 
   def redOne(): Unit = {
     withControllerAsync(ctrl => {
-      val sub = ctrl.events.subscribe(change => println(change), err => println("Error."), () => println("Completed!"))
+      ctrl.events subscribe pinObserver
       ctrl.rgbPins.head.enable()
       ctrl.ledPins(1).enableTimed(5.seconds)
     })

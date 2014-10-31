@@ -19,13 +19,13 @@ object PiBuild extends Build {
 
   val mleGroup = "com.github.malliina"
   lazy val projectSettings = assemblySettings ++ remoteSettings ++ Seq(
-    version := "0.1.6",
+    version := "0.2.0",
     scalaVersion := "2.11.2",
     SbtUtils.gitUserName := "malliina",
     SbtUtils.developerName := "Michael Skogberg",
     fork in Test := true,
     test in assembly := {},
-    mainClass in assembly := Some("com.mle.pi.Hello"),
+    mainClass in assembly := Some("com.mle.pi.run.Hello"),
     libraryDependencies ++= Seq(
       "com.pi4j" % "pi4j-core" % "0.0.5",
       "io.reactivex" %% "rxscala" % "0.21.1",

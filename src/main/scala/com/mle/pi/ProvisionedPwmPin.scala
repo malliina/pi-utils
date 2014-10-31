@@ -6,7 +6,11 @@ import com.pi4j.io.gpio.GpioPinPwmOutput
 /**
  * @author Michael
  */
-case class ProvisionedPwmPin(pin: GpioPinPwmOutput, number: Int) extends ProvisionedPin[GpioPinPwmOutput, PwmChanged] {
+case class ProvisionedPwmPin(pin: GpioPinPwmOutput, backing: PwmPin)
+  extends ProvisionedPin[GpioPinPwmOutput, PwmChanged] {
+
+  override val boardNumber: Int = backing.boardNumber
+
   def pwm = pin.getPwm
 
   def pwm_=(value: Int) = {

@@ -13,4 +13,7 @@ object PinEvents {
 
   case class PwmChanged(pin: ProvisionedPwmPin, value: Int) extends PinChangedEvent
 
+  case class Released(gpioNumber: Int) extends PinChangedEvent
+
+  case class Pwm(gpioNumber: Int, value: Int) extends PinChangedEvent
 }
