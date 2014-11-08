@@ -43,9 +43,11 @@ object Hello extends Log {
   def blaster(): Unit = {
     val b = new Blaster
     val num = PiRevB2.PIN07.gpioNumber
-    b.write(num, 200)
-    Thread sleep 5000
-    b.release(num)
+    PwmValue.from(200).map(v => {
+      b.write(num, v)
+      Thread sleep 5000
+      b.release(num)
+    })
   }
 
   def fiver(): Unit = {

@@ -19,8 +19,8 @@ object PiBuild extends Build {
 
   val mleGroup = "com.github.malliina"
   lazy val projectSettings = assemblySettings ++ remoteSettings ++ Seq(
-    version := "0.2.0",
-    scalaVersion := "2.11.2",
+    version := "0.3.2",
+    scalaVersion := "2.11.4",
     SbtUtils.gitUserName := "malliina",
     SbtUtils.developerName := "Michael Skogberg",
     fork in Test := true,
@@ -28,9 +28,9 @@ object PiBuild extends Build {
     mainClass in assembly := Some("com.mle.pi.run.Hello"),
     libraryDependencies ++= Seq(
       "com.pi4j" % "pi4j-core" % "0.0.5",
-      "io.reactivex" %% "rxscala" % "0.21.1",
-      "org.scala-lang.modules" %% "scala-xml" % "1.0.1", // scalatest 2.11 requires
-      mleGroup %% "util-base" % "0.3.0",
+      "io.reactivex" %% "rxscala" % "0.22.0",
+      "org.scala-lang.modules" %% "scala-xml" % "1.0.2", // scalatest 2.11 requires
+      mleGroup %% "util-base" % "0.3.4",
       mleGroup %% "util" % "1.5.0") map (_.withSources())
   )
 
